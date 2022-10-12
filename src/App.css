@@ -1,0 +1,24 @@
+.main{
+    /* background-color: white;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%; */
+}
+
+.project-form{
+    width: 40%;
+    background-color: rgba(224, 204, 204, 0.87);
+    color: rgb(43, 37, 34);
+    height: 700px;
+    /* border: 2px solid red; */
+}
+
+.display_projects{
+    width: 60%;
+    background-color: #3a075e;
+    color: rgb(234, 241, 212);
+    height: 700px;
+    /* border: 2px solid green; */
+}
