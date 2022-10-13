@@ -16,14 +16,14 @@ const BookForm = ({
   onOpen,
   onSetEditBook,
   onEditBook,
+  onSetBooksData,
   onBooksData,
   onSetBookValues,
   onBookValues,
   isEditMode,
+  isDataFromApi,
   refresh,
 }) => {
-  console.log("BookValues:", onBookValues);
-  console.log("onEditBook:", onEditBook);
   useEffect(() => {
     if (onEditBook.length != 0) {
       onSetBookValues({
@@ -32,22 +32,30 @@ const BookForm = ({
     }
   }, [onEditBook]);
 
-  //   const handleClickOpen = () => {
-  //     // onSetBookValues({})
-  //     onSetEditBook("");
-  //     onSetOpen(true);
-  //   };
-
-  //   const handleClose = () => {
-  //     onSetOpen(false);
-  //   };
+  console.log("Book Vlaues:", onBookValues);
 
   const handleAddOrEdit = (event) => {
     event.preventDefault();
 
     // Update Book
     if (isEditMode) {
-      console.log("BookValues:", onBookValues);
+      if (isDataFromApi) {
+        const newModifiedArray = Object.keys(onBooksData).map((bookItem) => {
+          const bookItemKeyOfValue = onBooksData[bookItem];
+
+          if (bookItemKeyOfValue.id === onBookValues.id) {
+            return {
+              ...onBookValues,
+            };
+          }
+          return bookItemKeyOfValue;
+        });
+        onSetBooksData(newModifiedArray);
+        onSetBookValues({ ...onBookInitialValues });
+        handleClose();
+        return;
+      }
+
       const existingBooks = JSON.parse(localStorage.getItem("bookAdded"));
       const newArray = existingBooks.map((bookItem) => {
         if (bookItem.id == onBookValues.id) {
@@ -58,14 +66,12 @@ const BookForm = ({
         }
         return bookItem;
       });
-      console.log("newArray:", newArray);
       localStorage.setItem("bookAdded", JSON.stringify(newArray));
     }
     // Inserts New Book
     else {
       const id = uuidv4();
       const updateBook = { ...onBookValues, id };
-      console.log(updateBook);
       localStorage.setItem(
         "bookAdded",
         JSON.stringify([...onBooksData, updateBook])
@@ -77,14 +83,24 @@ const BookForm = ({
     handleClose();
   };
 
-  console.log("onBookValues", onBookValues);
-
   const handleOnChange = (event) => {
     const { name, value } = event.target;
 
+    // From Database case
+    if (!isDataFromApi) {
+      onSetBookValues({
+        ...onBookValues,
+        [name]: value,
+      });
+      return;
+    }
+    // In case of Data from Google Books
     onSetBookValues({
       ...onBookValues,
-      [name]: value,
+      volumeInfo: {
+        ...onBookValues.volumeInfo,
+        [name]: value,
+      },
     });
   };
 
@@ -106,7 +122,25 @@ const BookForm = ({
               type="text"
               fullWidth
               variant="standard"
-              value={onBookValues.title}
+              value={
+                isDataFromApi
+                  ? onBookValues?.volumeInfo?.title
+                  : onBookValues.title
+              }
+              onChange={handleOnChange}
+            />
+            <TextField
+              name="isbn"
+              margin="dense"
+              label="ISBN"
+              type="number"
+              fullWidth
+              variant="standard"
+              value={
+                isDataFromApi && onBookValues?.volumeInfo?.industryIdentifiers
+                  ? onBookValues?.volumeInfo.industryIdentifiers[0].identifier
+                  : onBookValues.isbn
+              }
               onChange={handleOnChange}
             />
             <TextField
@@ -116,17 +150,25 @@ const BookForm = ({
               type="text"
               fullWidth
               variant="standard"
-              value={onBookValues.author_name}
+              value={
+                isDataFromApi
+                  ? onBookValues?.volumeInfo?.authors
+                  : onBookValues.author_name
+              }
               onChange={handleOnChange}
             />
             <TextField
               margin="dense"
               name="releaseDate"
-              label="Release Year"
+              label="Pages"
               type="number"
               fullWidth
               variant="standard"
-              value={onBookValues.releaseDate}
+              value={
+                isDataFromApi
+                  ? onBookValues?.volumeInfo?.pageCount
+                  : onBookValues.releaseDate
+              }
               onChange={handleOnChange}
             />
           </DialogContent>

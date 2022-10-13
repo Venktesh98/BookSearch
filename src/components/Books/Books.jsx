@@ -4,6 +4,7 @@ import BasicTable from "../Table/RenderTable";
 const bookInitialValues = {
   id: null,
   title: "",
+  isbn: "",
   author_name: "",
   releaseDate: "",
 };
